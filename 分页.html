@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body,html{
+            background: #222;
+        }
+        .pageBox{
+            width: 500px;
+            height: 50px;
+            display: flex;
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            margin-left: -250px;
+            align-items: center;
+            justify-content: center;
+        }
+        .lastpage,.nextpage,.pageNumber,.pagego{
+            width: 25px;
+            height: 25px;
+            background: #fff0eb;
+            color: #fc7961;
+            margin: 5px;
+            text-align: center;
+            line-height: 25px;
+            cursor: pointer;
+            border-radius: 2px;
+            font-weight: 500;
+            font-size: 14px;
+            user-select: none;
+        }
+        .pageNumber .act{
+            background: yellow;
+            color: #fff;
+        }
+        .dot{
+            width: 25px;
+            height: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            color: #fff;
+        }
+        .pagego{
+            width: 50px;
+            
+        }
+        .action{
+            width: 50px;
+            height: 25px;
+            margin: 5px;
+        }
+        .now{
+            color: #fff;
+            font-size: 12px;
+        }
+    </style>
+    <script src="./jquery.min.js"></script>
+</head>
+<body>
+    <div class="pageBox">
+        <!-- 上一页 -->
+        <!-- <div class="lastpage">
+           <span>&lt;</span>
+        </div> -->
+        <!-- 选项页 -->
+        <!-- <div class="pagediv" style="display: flex;">
+             <div class="pageNumber">1</div>
+             <div class="pageNumber">2</div>
+             <div class="pageNumber">3</div>
+             <div class="pageNumber">4</div>
+             <div class="pageNumber">5</div>
+             <div class="dot">...</div>
+        </div>  -->
+        <!-- 下一页 -->
+        <!-- <div class="nextpage">
+            <span>&gt;</span>
+        </div>
+        <input type="text" class="action">
+        <div class="pagego">确定</div> -->
+    </div>
+</body>
+<script>
+$(()=>{
+    let total = 1000     // 一共多少条数据
+    let pageShowArr = []    // 分页展示数组
+    let pagecount = 1     // 当前请求的页码数
+    let totals = Math.ceil(total/10)
+    request()
+    function request() {
+        if(pagecount == 1){
+             if(totals < 6){
+              for(let i=0;i<totals;i++){
+                  pageShowArr[i] = i +1
+              }
+            //   console.log(pageShowArr)
+           }else{
+               for(let i=0;i<6;i++){
+                 pageShowArr[i] = i +1
+               }
+               console.log(pageShowArr)
+           }
+        }else{
+            for(let i=0;i<6;i++){
+                 pageShowArr[i] = i +1
+               }
+        }
+           renderPage(totals)
+      }
+     function renderPage(totals){
+         $(".pageBox").empty()
+         if(totals < 6 && pagecount < 4){
+             $(".pageBox").append(`
+             <div class="lastpage">
+                <span>&lt;</span>
+              </div>
+              <div class="pagediv" style="display: flex;">
+              </div>
+              <div class="nextpage">
+            <span>&gt;</span>
+             </div>
+             <input type="text" class="action">
+             <span class="now">当前：${pagecount}/${totals}</span>
+             <div class="pagego">确定</div>
+             `)
+            for(i=0;i<pageShowArr.length;i++){
+              if(pageShowArr[i]){
+                  $(".pagediv").append(`<div class="pageNumber" index=${pageShowArr[i]}>${pageShowArr[i]}</div>`)
+              }
+            }
+         }else{
+            $(".pageBox").append(`
+             <div class="lastpage">
+                <span>&lt;</span>
+              </div>
+              <div class="pageNumber" index=1>1</div>
+              <div class="pagediv" style="display: flex;">
+              
+              </div>
+              <div class="pageNumber" index=${totals}>${totals}</div>
+              <div class="nextpage">
+            <span>&gt;</span>
+             </div>
+             <input type="text" class="action">
+             <span class="now">当前：${pagecount}/${totals}</span>
+             <div class="pagego">确定</div>
+             `)
+             $(".pagediv").after(`<div class="dot">...</div>`)
+            for(i=1;i<pageShowArr.length-1;i++){
+              if(pageShowArr[i]){
+                  $(".pagediv").append(`<div class="pageNumber" index=${pageShowArr[i]}>${pageShowArr[i]}</div>`)
+              }
+            }
+         }
+         
+     } 
+    $(".pageBox").on('click','.pageNumber',function(){       
+          pagecount = $(this).attr('index') * 1
+           judPageCount(pagecount)
+               $(this).addClass('act')   
+      })
+   function judPageCount(pagecount) {
+         if(pagecount < 4){
+            request()
+            console.log(pageShowArr)
+          }else if(pagecount >=4 && totals > 6 && pagecount < totals-2){
+             pageShowArr = [1,pagecount-1,pagecount,pagecount+1,totals]        // 5   [1,4,5,6,10]  6   [1,5,6,7,10]   7   [1,6,7,8,10] 
+             console.log(pageShowArr)
+             changeRender(pagecount)
+          }else if(pagecount >= totals-2 ){
+              pageShowArr = [1,totals-3,totals-2,totals-1,totals]
+              console.log(pageShowArr)
+              changeRender(pagecount)
+          }else if(pagecount == 3){
+              request()
+          }
+     }   
+   function changeRender(count) {
+        $(".pageBox").empty()
+        // if(count<4){      
+        //     renderPage(totals)
+        // }else 
+        if(count >=4 && count < totals-2){
+            $(".pageBox").append(`
+             <div class="lastpage">
+                <span>&lt;</span>
+              </div>
+              <div class="pageNumber" index=1>1</div>
+              <div class="pagediv" style="display: flex;">
+              </div>
+              <div class="nextpage">
+            <span>&gt;</span>
+             </div>
+             <input type="text" class="action">
+             <span class="now">当前：${count}/${totals}</span>
+             <div class="pagego">确定</div>
+             `)
+             $(".pagediv").before(`<div class="dot">...</div>`)
+             
+            for(i=1;i<pageShowArr.length;i++){
+              if(pageShowArr[i]){
+                  $(".pagediv").append(`<div class="pageNumber" index=${pageShowArr[i]}>${pageShowArr[i]}</div>`)
+              }
+            }
+            $(".pageNumber").eq(4).before(`<div class="dot">...</div>`)
+        }else if(count >= totals -2){
+            $(".pageBox").append(`
+             <div class="lastpage">
+                <span>&lt;</span>
+              </div>
+              <div class="pageNumber" index=1>1</div>
+              <div class="pagediv" style="display: flex;">
+              </div>
+              <div class="nextpage">
+            <span>&gt;</span>
+             </div>
+             <input type="text" class="action">
+             <span class="now">当前：${count}/${totals}</span>
+             <div class="pagego">确定</div>
+             `)
+             $(".pagediv").before(`<div class="dot">...</div>`)
+            for(i=1;i<pageShowArr.length;i++){
+              if(pageShowArr[i]){
+                  $(".pagediv").append(`<div class="pageNumber" index=${pageShowArr[i]}>${pageShowArr[i]}</div>`)
+              }
+            }
+        }
+      }
+    //  input跳转
+    $('.pageBox').on('click','.pagego',function(){
+        let count = $(this).siblings('input').val() * 1
+        pagecount = count
+        judPageCount(count)
+        
+    })
+    $('.pageBox').on('click','.nextpage',function(){
+        if(pagecount == totals){
+               pagecount = totals
+           }else{
+              pagecount++ 
+           }       
+            judPageCount(pagecount)          
+      })
+      $('.pageBox').on('click','.lastpage',function(){       
+           if(pagecount == 1){
+              pagecount = 1
+           }else{
+               pagecount--
+           }
+           judPageCount(pagecount)     
+      })   
+})
+
+
+
+
+</script>
+</html>   
